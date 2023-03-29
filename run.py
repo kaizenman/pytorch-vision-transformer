@@ -10,6 +10,9 @@ from torch.optim.lr_scheduler import LinearLR
 
 from pathlib import Path
 
+torch.manual_seed(1)
+torch.cuda.manual_seed(1)
+
 # download data
 data.download_data(
   'https://github.com/mrdbourke/pytorch-deep-learning/raw/main/data/pizza_steak_sushi.zip',
@@ -20,9 +23,9 @@ data.download_data(
 # transform
 WIDTH=224
 HEIGHT=224
-BATCH_SIZE=16
-EPOCHS=7
-BASE_LR=8**-4
+BATCH_SIZE=64
+EPOCHS=300
+BASE_LR=3*10**-3
 LR_WARMUP=79
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -53,7 +56,12 @@ visition_transformer = model.VisionTransformer(batches=16, out_features=len(clas
 #   row_settings=["var_names"]
 # )
 
-optimizer = torch.optim.Adam(params=visition_transformer.parameters(), lr=BASE_LR)
+optimizer = torch.optim.Adam(
+  params=visition_transformer.parameters(),
+  lr=BASE_LR,
+  betas=(0.9, 0.999),
+  weight_decay=0.3
+)
 
 print(f'Training using device {device}')
 
