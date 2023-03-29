@@ -23,7 +23,7 @@ data.download_data(
 # transform
 WIDTH=224
 HEIGHT=224
-BATCH_SIZE=64
+BATCH_SIZE=32
 EPOCHS=300
 BASE_LR=3*10**-3
 LR_WARMUP=79
