@@ -13,15 +13,15 @@ TRAINING_RESOLUTION=224
 VIT_BASE_NUM_PATCHES=196
 
 class EmbeddedPatches(torch.nn.Module):
-  def __init__(self, in_features):
+  def __init__(self, colors, batches):
     super().__init__()
 
     # patches -> hybrid architecture - feature maps of a CNN
     self.patcher = torch.nn.Conv2d(
-      in_channels=in_features,
+      in_channels=colors,
       out_channels=VIT_BASE_HIDDEN_SIZE,
-      kernel_size=VIT_BASE_PATCH_SIZE,
-      stride=VIT_BASE_PATCH_SIZE,
+      kernel_size=batches,
+      stride=batches,
       padding=0
     )
     self.flatten_layer = torch.nn.Flatten(start_dim=2, end_dim=3)
@@ -29,12 +29,10 @@ class EmbeddedPatches(torch.nn.Module):
   def forward(self, x):
     # [[class] embedding; flattened patches] + position embedding
     # [Xclass; x1pE; x2pE; ...; xNpE] + Epos
-
-    # [1, 768, 196]
     x_patched = self.patcher(x)
     x_flattened = self.flatten_layer(x_patched)
-
-    return x_flattened.permute(0, 2, 1)
+    x_flattened = x_flattened.permute(0, 2, 1) 
+    return x_flattened
 
 # MSA(LN(zl-1)) + zl-1
 class MSABlock(torch.nn.Module):
@@ -57,15 +55,15 @@ class MSABlock(torch.nn.Module):
 
 # MLP(LN(zl)) + zl
 class MLPHead(torch.nn.Module):
-  def __init__(self, droupout=VIT_BASE_16_DROPOUT):
+  def __init__(self, dropout=VIT_BASE_16_DROPOUT):
     super().__init__()
     self.layer_norm = torch.nn.LayerNorm(normalized_shape=768)
     self.mlp = torch.nn.Sequential(
       torch.nn.Linear(in_features=VIT_BASE_HIDDEN_SIZE, out_features=VIT_BASE_MLP_SIZE),
-      torch.nn.GELU(),
-      torch.nn.Dropout(p=droupout),
+      torch.nn.ReLU(),
+      torch.nn.Dropout(p=dropout),
       torch.nn.Linear(in_features=VIT_BASE_MLP_SIZE, out_features=VIT_BASE_HIDDEN_SIZE),
-      torch.nn.Dropout(p=droupout),
+      torch.nn.Dropout(p=dropout),
     )
   def forward(self, x): 
     x = self.layer_norm(x)
@@ -79,23 +77,36 @@ class TransformerEncoder(torch.nn.Module):
     self.mlp_head = MLPHead()
 
   def forward(self, x):
-    return self.mlp_head(self.msa(x))
+    x = self.msa(x) + x       # + x is residual connection
+    x = self.mlp_head(x) + x  # + x is residual connection
+    return x
 
 class VisionTransformer(torch.nn.Module):
-  def __init__(self, in_features, out_features=3):
+  def __init__(self, batches, out_features=3):
     super().__init__()
-    self.patcher = EmbeddedPatches(in_features)
-    self.encoder = TransformerEncoder()
+    self.patcher = EmbeddedPatches(colors=3, batches=batches)
+    self.encoder = torch.nn.Sequential(
+       *[TransformerEncoder() for _ in range(VIT_BASE_LAYERS)]
+    )
+    self.class_embedding = torch.nn.Parameter(
+      torch.randn(batches, 1, VIT_BASE_HIDDEN_SIZE), requires_grad=True)
+    self.embedding_dropout = torch.nn.Dropout(p=VIT_BASE_16_DROPOUT)
+    self.position_embedding = torch.nn.Parameter(
+      torch.randn(batches, VIT_BASE_NUM_PATCHES + 1, VIT_BASE_HIDDEN_SIZE), requires_grad=True)
     self.decoder = torch.nn.Sequential(
-      torch.nn.LayerNorm(normalized_shape=768),
+      torch.nn.LayerNorm(normalized_shape=VIT_BASE_HIDDEN_SIZE),
       torch.nn.Linear(in_features=VIT_BASE_HIDDEN_SIZE, out_features=out_features)
     )
-    self.class_embedding = torch.nn.Parameter(data=torch.randn(1, 1, 768), requires_grad=True)
-    self.position_embedding = torch.nn.Parameter(torch.randn(1, 196 + 1, 768), requires_grad=True)
 
   def forward(self, x):
     x = self.patcher(x)
     x = torch.cat((self.class_embedding, x), dim=1)
     x = x + self.position_embedding
+
+    x = self.embedding_dropout(x)
+
     x = self.encoder(x)
-    return self.decoder(x)
+    
+    x = self.decoder(x[:, 0])
+
+    return x
