@@ -4,7 +4,8 @@ def train_step(model, dataloader, loss_fn, accuracy_fn, optimizer, lr_scheduler,
   model.train()
   train_loss = 0
   train_accuracy = 0
-  for _, (X, y) in enumerate(dataloader):
+  for batch, (X, y) in enumerate(dataloader):
+    print(f'train step batch: {X.shape[0]}')
     X,y = X.to(device), y.to(device)
     print(f'Image shape: {X.shape}')
 

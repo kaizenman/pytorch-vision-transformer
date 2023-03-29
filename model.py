@@ -101,23 +101,23 @@ class VisionTransformer(torch.nn.Module):
     )
 
   def forward(self, x):
-    batch_size = x.shape[0] # 1 or 16
-    print(f'batch_size: {batch_size}')
-    class_token = self.class_embedding.expand(16, -1, -1)
+    # batch_size = x.shape[0] # 1 or 16
+    # print(f'batch_size: {batch_size}')
+    # class_token = self.class_embedding.expand(16, -1, -1)
     # to transform [1, 196, 768] to [16, 196, 768]
     # because sometimes we get batch with size 1, for example
-    print(f'Class_token after expand: {class_token.shape}')
-
+    # print(f'Class_token after expand: {class_token.shape}')
+#
     x = self.patcher(x)
-    print(f'After patcher: {x.shape}')
-    x = torch.cat((class_token, x), dim=1)
-    print(f'After class_embedding: {x.shape}')
+    # print(f'After patcher: {x.shape}')
+    x = torch.cat((self.class_embedding, x), dim=1)
+    # print(f'After class_embedding: {x.shape}')
     x = x + self.position_embedding
-    print(f'After position_embedding: {x.shape}')
+    # print(f'After position_embedding: {x.shape}')
     x = self.embedding_dropout(x)
-    print(f'After embedding droupout: {x.shape}')
+    # print(f'After embedding droupout: {x.shape}')
     x = self.encoder(x)
-    print(f'After encoder: {x.shape}')
+    # print(f'After encoder: {x.shape}')
     x = self.decoder(x[:, 0])
-    print(f'After decoder: {x.shape}')
+    # print(f'After decoder: {x.shape}')
     return x
