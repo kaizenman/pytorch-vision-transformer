@@ -99,9 +99,14 @@ class VisionTransformer(torch.nn.Module):
     )
 
   def forward(self, x):
+    batch_size = x.shape[0] # 1 or 16
     x = self.patcher(x)
     print(f'After patcher: {x.shape}')
-    x = torch.cat((self.class_embedding, x), dim=1)
+    # to transform [1, 196, 768] to [16, 196, 768]
+    # because sometimes we get batch with size 1, for example
+    class_token = self.class_embedding.expand(batch_size, -1, -1)
+    print(f'Class_token after expand: {class_token.shape}')
+    x = torch.cat((class_token, x), dim=1)
     print(f'After class_embedding: {x.shape}')
     x = x + self.position_embedding
     print(f'After position_embedding: {x.shape}')
