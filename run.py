@@ -68,6 +68,11 @@ results = train(
   device=device
 )
 
+model_dir = Path('model')
+if not model_dir.is_dir():
+  print('{model_dir} does not exist. Creating...')
+  model_dir.mkdir(parents=True, exist_ok=True)
+
 model_save_path=Path('model/torch_vision_model.pth')
 print(f'Saving to model/torch_vision_model.pth...')
 torch.save(obj=visition_transformer.state_dict(), f=model_save_path)
