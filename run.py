@@ -1,6 +1,6 @@
 import torch
 import torchinfo
-import data, dataloader, model
+import data, dataloader, model, measure
 
 from train import train
 from torchvision.transforms import transforms
@@ -65,7 +65,7 @@ optimizer = torch.optim.Adam(
 
 print(f'Training using device {device}')
 
-results = train(
+parameters = train(
   epochs=EPOCHS,
   model=visition_transformer,
   train_dataloader=train_dataloader,
@@ -76,12 +76,16 @@ results = train(
   device=device
 )
 
+model_name='ViT_model'
+measure.visualize_learning(parameters=parameters, model_name=model_name)
+
 model_dir = Path('model')
 if not model_dir.is_dir():
   print('{model_dir} does not exist. Creating...')
   model_dir.mkdir(parents=True, exist_ok=True)
 
-model_save_path=Path('model/torch_vision_model.pth')
+model_save_path=Path(f'model/{model_name}.pth')
 print(f'Saving to model/torch_vision_model.pth...')
 torch.save(obj=visition_transformer.state_dict(), f=model_save_path)
 print(f'Saved.')
+
