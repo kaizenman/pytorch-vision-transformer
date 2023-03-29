@@ -9,12 +9,14 @@ def dataloaders(train_dir, test_dir, transform, batch_size, num_workers=0):
   train_dataloader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
+    drop_last=True,
     shuffle=True,
     num_workers=num_workers
   )
   test_dataloader = DataLoader(
     dataset=test_dataset,
     batch_size=batch_size,
+    drop_last=True,
     shuffle=False,
     num_workers=num_workers
   )
