@@ -1,21 +1,21 @@
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-def visualize_learning(parameters, model_name):
-  epochs = range(len(parameters['train_loss']))
+def visualize_learning(losses, model_name):
+  epochs = range(len(losses['train_loss']))
   
   f = plt.figure(figsize=(12, 9))
   plt.subplot(2, 2, 1)
 
-  plt.plot(epochs, parameters['train_loss'], label='Train Loss')
-  plt.plot(epochs, parameters['test_loss'], label='Test Loss')
+  plt.plot(epochs, losses['train_loss'], label='Train Loss')
+  plt.plot(epochs, losses['test_loss'], label='Test Loss')
   plt.title('Loss')
   plt.xlabel(xlabel='Epochs')
   plt.legend()
 
   plt.subplot(2, 2, 2)
-  plt.plot(epochs, parameters['train_accuracy'], label='Train Accuracy')
-  plt.plot(epochs, parameters['test_accuracy'], label='Test Accuracy')
+  plt.plot(epochs, losses['train_accuracy'], label='Train Accuracy')
+  plt.plot(epochs, losses['test_accuracy'], label='Test Accuracy')
   plt.title('Accuracy')
   plt.xlabel(xlabel='Epochs')
   plt.legend()
