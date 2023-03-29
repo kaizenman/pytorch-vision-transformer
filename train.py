@@ -29,7 +29,8 @@ def train(
     parameters['test_loss'].append(test_loss)
     parameters['test_accuracy'].append(test_accuracy)
 
-    print(f'epoch: {epoch} | train_loss: {train_loss:.4f} | train_accuracy: {train_accuracy:.4f} | test_loss: {test_loss:.4f} | test_accuracy: {test_accuracy:.4f}')
+    if epoch % 50:
+      print(f'epoch: {epoch} | train_loss: {train_loss:.4f} | train_accuracy: {train_accuracy:.4f} | test_loss: {test_loss:.4f} | test_accuracy: {test_accuracy:.4f}')
 
   return parameters
 

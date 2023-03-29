@@ -7,7 +7,7 @@ def visualize_learning(parameters, model_name):
   f = plt.figure(figsize=(12, 9))
   plt.subplot(2, 2, 1)
 
-  plt.plot(epochs, parameters['train_losses'], label='Train Loss')
+  plt.plot(epochs, parameters['train_loss'], label='Train Loss')
   plt.plot(epochs, parameters['test_loss'], label='Test Loss')
   plt.title('Loss')
   plt.xlabel(xlabel='Epochs')
