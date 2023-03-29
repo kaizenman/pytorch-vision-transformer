@@ -9,8 +9,9 @@ VIT_BASE_ATTN_DROPOUT=0
 VIT_BASE_16_DROPOUT=0.1
 TRAINING_RESOLUTION=224
 
-# int(TRAINING_RESOLUTION ** 2 / VIT_BASE_PATCH_SIZE)
-VIT_BASE_NUM_PATCHES=196
+VIT_BASE_NUM_PATCHES=int(TRAINING_RESOLUTION * TRAINING_RESOLUTION // VIT_BASE_PATCH_SIZE ** 2)
+#  self.num_patches = (img_size * img_size) // patch_size**2
+# VIT_BASE_NUM_PATCHES=196
 
 class EmbeddedPatches(torch.nn.Module):
   def __init__(self, colors, batches):
@@ -83,6 +84,7 @@ class TransformerEncoder(torch.nn.Module):
 
 class VisionTransformer(torch.nn.Module):
   def __init__(self, batches, out_features=3):
+    assert TRAINING_RESOLUTION % VIT_BASE_PATCH_SIZE == 0, f"Image size must be divisible by patch size, image size: {TRAINING_RESOLUTION}, patch size: {VIT_BASE_PATCH_SIZE}."
     super().__init__()
     self.patcher = EmbeddedPatches(colors=3, batches=batches)
     self.encoder = torch.nn.Sequential(
@@ -100,12 +102,14 @@ class VisionTransformer(torch.nn.Module):
 
   def forward(self, x):
     batch_size = x.shape[0] # 1 or 16
-    x = self.patcher(x)
-    print(f'After patcher: {x.shape}')
+    print(f'batch_size: {batch_size}')
+    class_token = self.class_embedding.expand(batch_size, -1, -1)
     # to transform [1, 196, 768] to [16, 196, 768]
     # because sometimes we get batch with size 1, for example
-    class_token = self.class_embedding.expand(batch_size, -1, -1)
     print(f'Class_token after expand: {class_token.shape}')
+
+    x = self.patcher(x)
+    print(f'After patcher: {x.shape}')
     x = torch.cat((class_token, x), dim=1)
     print(f'After class_embedding: {x.shape}')
     x = x + self.position_embedding
