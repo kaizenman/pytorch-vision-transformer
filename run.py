@@ -58,7 +58,7 @@ optimizer = torch.optim.Adam(params=visition_transformer.parameters(), lr=BASE_L
 print(f'Training using device {device}')
 
 results = train(
-  epochs=1,
+  epochs=EPOCHS,
   model=visition_transformer,
   train_dataloader=train_dataloader,
   test_dataloader=test_dataloader,
