@@ -45,13 +45,13 @@ img, label = batched_img[0], batched_label[0]
 
 visition_transformer = model.VisionTransformer(batches=16, out_features=len(class_names)).to(device)
 
-torchinfo.summary(
-  model=visition_transformer,
-  input_size=[16, 3, 224, 224],
-  col_names=["input_size", "output_size", "num_params", "trainable"],
-  col_width=20,
-  row_settings=["var_names"]
-)
+# torchinfo.summary(
+#   model=visition_transformer,
+#   input_size=[16, 3, 224, 224],
+#   col_names=["input_size", "output_size", "num_params", "trainable"],
+#   col_width=20,
+#   row_settings=["var_names"]
+# )
 
 optimizer = torch.optim.Adam(params=visition_transformer.parameters(), lr=BASE_LR)
 
