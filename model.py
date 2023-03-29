@@ -61,7 +61,7 @@ class MLPHead(torch.nn.Module):
     self.layer_norm = torch.nn.LayerNorm(normalized_shape=768)
     self.mlp = torch.nn.Sequential(
       torch.nn.Linear(in_features=VIT_BASE_HIDDEN_SIZE, out_features=VIT_BASE_MLP_SIZE),
-      torch.nn.ReLU(),
+      torch.nn.GELU(),
       torch.nn.Dropout(p=dropout),
       torch.nn.Linear(in_features=VIT_BASE_MLP_SIZE, out_features=VIT_BASE_HIDDEN_SIZE),
       torch.nn.Dropout(p=dropout),
