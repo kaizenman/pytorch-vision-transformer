@@ -6,6 +6,8 @@ def train_step(model, dataloader, loss_fn, accuracy_fn, optimizer, lr_scheduler,
   train_accuracy = 0
   for _, (X, y) in enumerate(dataloader):
     X,y = X.to(device), y.to(device)
+    print(f'Image shape: {X.shape}')
+
     y_pred = model(X)
     loss = loss_fn(y_pred, y)
     train_loss += loss

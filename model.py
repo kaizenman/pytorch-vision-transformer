@@ -100,13 +100,15 @@ class VisionTransformer(torch.nn.Module):
 
   def forward(self, x):
     x = self.patcher(x)
+    print(f'After patcher: {x.shape}')
     x = torch.cat((self.class_embedding, x), dim=1)
+    print(f'After class_embedding: {x.shape}')
     x = x + self.position_embedding
-
+    print(f'After position_embedding: {x.shape}')
     x = self.embedding_dropout(x)
-
+    print(f'After embedding droupout: {x.shape}')
     x = self.encoder(x)
-    
+    print(f'After encoder: {x.shape}')
     x = self.decoder(x[:, 0])
-
+    print(f'After decoder: {x.shape}')
     return x
