@@ -46,7 +46,7 @@ train_dataloader, test_dataloader, class_names = dataloader.dataloaders(
 batched_img, batched_label = next(iter(train_dataloader))
 img, label = batched_img[0], batched_label[0]
 
-visition_transformer = model.VisionTransformer(batches=16, out_features=len(class_names)).to(device)
+visition_transformer = model.VisionTransformer(batches=BATCH_SIZE, out_features=len(class_names)).to(device)
 
 # torchinfo.summary(
 #   model=visition_transformer,
