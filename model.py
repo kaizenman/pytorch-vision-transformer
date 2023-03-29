@@ -103,7 +103,7 @@ class VisionTransformer(torch.nn.Module):
   def forward(self, x):
     batch_size = x.shape[0] # 1 or 16
     print(f'batch_size: {batch_size}')
-    class_token = self.class_embedding.expand(batch_size, -1, -1)
+    class_token = self.class_embedding.expand(16, -1, -1)
     # to transform [1, 196, 768] to [16, 196, 768]
     # because sometimes we get batch with size 1, for example
     print(f'Class_token after expand: {class_token.shape}')
